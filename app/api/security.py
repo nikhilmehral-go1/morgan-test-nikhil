@@ -2,7 +2,7 @@ import os
 import httpx
 import jwt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from typing import List
 
@@ -52,7 +52,7 @@ class AuthChecker:
     def __init__(self, required_user_roles: List[str] = []):
         self.required_user_roles = required_user_roles
 
-    async def __call__(self, credentials: str = Depends(bearer_scheme)):
+    async def __call__(self, credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
         print("--- AuthChecker dependency has been triggered! ---")
         token = credentials.credentials
 
@@ -101,4 +101,4 @@ class AuthChecker:
         #         )
 
         # If all checks pass, the request can proceed.
-        return jwt_payload
+        return {"jwt_payload": jwt_payload, "token": token}

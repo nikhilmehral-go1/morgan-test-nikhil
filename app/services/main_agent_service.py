@@ -22,7 +22,7 @@ llm_config = {
 }
 
 # --- Main Service Function ---
-def solve_task_with_agent(task: str) -> str:
+def solve_task_with_agent(task: str, jwt_token: str) -> str:
     """
     Sets up and runs an AutoGen agent conversation to solve a given task.
     """
@@ -44,8 +44,13 @@ def solve_task_with_agent(task: str) -> str:
         code_execution_config=False,
     )
 
+    # Create a wrapper function that includes the JWT token
+    def get_learning_objects_with_jwt(keyword: str = "") -> str:
+        """Wrapper function that passes the JWT token to the learning objects tool."""
+        return get_learning_objects_tool(keyword, jwt_token)
+
     autogen.register_function(
-        get_learning_objects_tool,
+        get_learning_objects_with_jwt,
         caller=assistant,      # The assistant suggests the function call
         executor=user_proxy,   # The user_proxy executes the function call
         name="get_learning_objects_tool",

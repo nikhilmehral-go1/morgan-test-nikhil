@@ -1,6 +1,7 @@
 import os
 import httpx
 import logging
+from typing import Optional
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -24,10 +25,17 @@ def _get_oauth_token() -> str:
     return token
 
 # --- Your Tool Function ---
-def get_learning_objects_tool(keyword: str = "") -> str:
+def get_learning_objects_tool(keyword: str = "", jwt_token: Optional[str] = None) -> str:
     """Get learning objects from Go1 API with optional keyword search."""
     try:
-        token = _get_oauth_token()
+        # Use the passed JWT token if available, otherwise fall back to environment token
+        if jwt_token:
+            token = jwt_token
+            logger.debug("Using JWT token from request")
+        else:
+            token = _get_oauth_token()
+            logger.debug("Using token from environment variables")
+            
         headers = {
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",

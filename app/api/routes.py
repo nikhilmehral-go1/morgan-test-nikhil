@@ -20,17 +20,18 @@ auth_checker_dependency = AuthChecker()
 
 # Apply the role checker dependency to the endpoint
 @router.post("/ask",
-    response_model=AnswerResponse,
-    dependencies=[Depends(auth_checker_dependency)] # This line protects the route
+    response_model=AnswerResponse
 )
-async def ask_question(request: QuestionRequest):
+async def ask_question(request: QuestionRequest, auth_result: dict = Depends(auth_checker_dependency)):
     """
     Receives a question and uses the agent service to find the answer.
     This endpoint is protected and requires the 'admin' role.
     """
     try:
-        # Call the service function to handle the core logic
-        result = solve_task_with_agent(request.question)
+        # Extract the JWT token from the auth result
+        jwt_token = auth_result["token"]
+        # Call the service function to handle the core logic with JWT
+        result = solve_task_with_agent(request.question, jwt_token)
         return AnswerResponse(answer=result)
     except Exception as e:
         # Handle potential errors from the service
